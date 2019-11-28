@@ -1,5 +1,23 @@
 import glob
 import re
+import lxml.etree
+
+from nltk import word_tokenize, sent_tokenize
+
+def annotated2sentences(path):
+    sentences = []
+    tree = lxml.etree.parse(path)
+    for speech in tree.iterfind('//said'):
+        direct = 'I' if speech.attrib['direct'].lower().strip() == 'true' else 'O'
+        text = ' '.join(speech.itertext())
+        text = ' '.join(text.split())
+
+        for sent in sent_tokenize(text):
+            sentence = []
+            for token in word_tokenize(sent):
+                sentence.append((token, direct))
+            sentences.append(sentence)
+    return sentences
 
 def extract_ds_from_vrt (in_path, header = True):
     words = []
@@ -102,11 +120,11 @@ def write_to_bert_input_file (out_path, tokens):
             fout.write (' '.join (t) + '\n')
 
 if __name__ == '__main__':
-tokens = []
-fnames = glob.glob ('gutenberg_cor-de/*') + glob.glob ('kern_rich-de/*')
-for fname in fnames:
-    try:
-        tokens += vrt2bert (fname)
-    except:
-        print ('Failed:', fname)
-    writeToFile ('deBert.vrt', tokens)
+    tokens = []
+    fnames = glob.glob ('gutenberg_cor-de/*') + glob.glob ('kern_rich-de/*')
+    for fname in fnames:
+        try:
+            tokens += vrt2bert (fname)
+        except:
+            print ('Failed:', fname)
+        writeToFile ('deBert.vrt', tokens)
