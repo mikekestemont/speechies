@@ -2,6 +2,7 @@ from xml.etree import ElementTree as et
 import itertools
 import re
 import os
+# from pdb import set_trace
 
 def baseline(in_file, out_file):
     with open(in_file, 'r', encoding='utf-8') as inf:
@@ -9,15 +10,12 @@ def baseline(in_file, out_file):
     patterns = [
         re.compile(r"^\s*([\"].*?[\"])", flags=re.MULTILINE),
         re.compile(r"^\s*([\'].*?[\'])", flags=re.MULTILINE),
+        re.compile(r"^\s*([-——-———]+.*?)$", flags=re.MULTILINE),
+        re.compile(r"^\s*([-——-———]+.*?)\n", flags=re.MULTILINE),
         re.compile(r"^\s*([-]+.*?[-]+)", flags=re.MULTILINE),
         re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
         re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
-        re.compile(r"^\s*([-]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([-]+.*?)\n", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?)\n", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?)\n", flags=re.MULTILINE),
+        re.compile(r"^\s*([--]+.*?)[»]", flags=re.MULTILINE),
         re.compile(r"^\s*([„].*?[”])", flags=re.MULTILINE),
         re.compile(r"^\s*([«].*?[»])", flags=re.MULTILINE),
         re.compile(r"^\s*([»].*?[«])", flags=re.MULTILINE),
@@ -28,9 +26,6 @@ def baseline(in_file, out_file):
         re.compile(r"^\s*([»].*?)$", flags=re.MULTILINE),
         re.compile(r"^\s*([«].*?)\n", flags=re.MULTILINE),
         re.compile(r"^\s*([»].*?)\n", flags=re.MULTILINE),
-        re.compile(r"([-]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"([—]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"([—]+.*?)$", flags=re.MULTILINE),
     ]
     
     xml_string = et.fromstring(xml)
@@ -50,11 +45,13 @@ def baseline(in_file, out_file):
                     continue
                 new_content += f'<p n="{paragraph_n}">'
                 p_content = paragraph.text.strip()
+                # if paragraph_n == 'FRA027013399':
+                    # set_trace ()
                 # Find matches
-                matches = [re.match(pattern, p_content) for pattern in patterns]
+                matches = [bool(re.match(pattern, p_content)) for pattern in patterns]
                 if any(matches):
                     # get first matching pattern
-                    pattern = patterns[next((i for i, j in enumerate(matches) if j), None)]
+                    pattern = patterns[matches.index(True)]
                     for match in re.finditer(pattern, p_content):
                         if match.start() == 0 and match.end() < len(p_content) - 1:
                             tagged_line = f'<said direct="true">{match.group()}</said><said direct="false">{p_content[match.end():]}</said></p>\n'
@@ -73,12 +70,12 @@ def baseline(in_file, out_file):
                             new_content += tagged_line
                             continue
                         else:
-                            tagged_line = f'<said direct="false">{p_content}</said></p>\n'
-                            new_content += tagged_line    
+                            tagged_line = f'<said direct="true">{p_content}</said></p>\n'
+                            new_content += tagged_line 
                             continue
                 else:
                     tagged_line = f'<said direct="false">{p_content}</said></p>\n'
-                    new_content += tagged_line  
+                    new_content += tagged_line
          
             new_content += '</sample>\n'
         new_content += '</samples>'
