@@ -45,8 +45,8 @@ def main():
         s = '\n'.join([' '.join(token) for token in sentence]) + '\n'
         formatted_sentences.append(s)
 
-    for sentence in formatted_sentences:
-        print(sentence)
+    # for sentence in formatted_sentences:
+        # print(sentence)
     
     train, rest = split(formatted_sentences,
                         train_size=args.train_prop,
@@ -62,7 +62,7 @@ def main():
     print(f'# test items: {len(test)}')
 
     for items in ('train', 'dev', 'test'):
-        with open(os.sep.join((args.split_dir, items + '.txt')), 'w') as f:
+        with open(os.sep.join((args.split_dir, items + '.txt')), 'w', encoding = 'utf8') as f:
             f.write('\n'.join(eval(items)))
     
 
