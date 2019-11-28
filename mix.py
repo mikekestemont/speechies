@@ -40,13 +40,13 @@ def main():
 
     mixed_sentences = interleave(sentence_iters)
 
-    for sentence in mixed_sentences:
-        print(sentence)
-
     formatted_sentences = []
     for sentence in mixed_sentences:
         s = '\n'.join([' '.join(token) for token in sentence]) + '\n'
         formatted_sentences.append(s)
+
+    for sentence in formatted_sentences:
+        print(sentence)
     
     train, rest = split(formatted_sentences,
                         train_size=args.train_prop,
