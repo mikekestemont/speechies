@@ -2,11 +2,32 @@ from xml.etree import ElementTree as et
 import itertools
 import re
 import os
+# from pdb import set_trace
 
 def baseline(in_file, out_file):
     with open(in_file, 'r', encoding='utf-8') as inf:
         xml = inf.read()
-    pattern = re.compile(r'^([„\"«‹„»›‟‛”’"❛❜❝❞❮⹂〞〟＂“\'].*?[”\"»›«‹“‘❯〝‟‛”’"❛❜❝❞”\'])|([‒–—―⁓].*?[‒–—―⁓])', flags=re.MULTILINE)
+    patterns = [
+        re.compile(r"^\s*([\"].*?[\"])", flags=re.MULTILINE),
+        re.compile(r"^\s*([\'].*?[\'])", flags=re.MULTILINE),
+        re.compile(r"^\s*([-——-———]+.*?)$", flags=re.MULTILINE),
+        re.compile(r"^\s*([-——-———]+.*?)\n", flags=re.MULTILINE),
+        re.compile(r"^\s*([-]+.*?[-]+)", flags=re.MULTILINE),
+        re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
+        re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
+        re.compile(r"^\s*([--]+.*?)[»]", flags=re.MULTILINE),
+        re.compile(r"^\s*([„].*?[”])", flags=re.MULTILINE),
+        re.compile(r"^\s*([«].*?[»])", flags=re.MULTILINE),
+        re.compile(r"^\s*([»].*?[«])", flags=re.MULTILINE),
+        re.compile(r"^\s*([›].*?[‹])", flags=re.MULTILINE),
+        re.compile(r"^\s*([“].*?[”])", flags=re.MULTILINE),
+        re.compile(r"^\s*([„].*?[“])", flags=re.MULTILINE),
+        re.compile(r"^\s*([«].*?)$", flags=re.MULTILINE),
+        re.compile(r"^\s*([»].*?)$", flags=re.MULTILINE),
+        re.compile(r"^\s*([«].*?)\n", flags=re.MULTILINE),
+        re.compile(r"^\s*([»].*?)\n", flags=re.MULTILINE),
+    ]
+    
     xml_string = et.fromstring(xml)
     tree = et.ElementTree(xml_string)
     root = tree.getroot()
@@ -24,32 +45,38 @@ def baseline(in_file, out_file):
                     continue
                 new_content += f'<p n="{paragraph_n}">'
                 p_content = paragraph.text.strip()
+                # if paragraph_n == 'FRA027013399':
+                    # set_trace ()
                 # Find matches
-                if re.match(pattern, p_content):
+                matches = [bool(re.match(pattern, p_content)) for pattern in patterns]
+                if any(matches):
+                    # get first matching pattern
+                    pattern = patterns[matches.index(True)]
                     for match in re.finditer(pattern, p_content):
                         if match.start() == 0 and match.end() < len(p_content) - 1:
-                            tagged_line = f'<said direct=True>{match.group()}</said><said direct=False>{p_content[match.end():]}</said></p>\n'
+                            tagged_line = f'<said direct="true">{match.group()}</said><said direct="false">{p_content[match.end():]}</said></p>\n'
                             new_content += tagged_line
                             continue
                         elif match.start() > 0 and match.end() < len(p_content) - 1:
-                            tagged_line = f'<said direct=False>{p_content[:match.start()]}</said><said direct=True>{match.group()}</said><said direct=False>{p_content[match.end():]}</said></p>\n'
+                            tagged_line = f'<said direct="false">{p_content[:match.start()]}</said><said direct="true">{match.group()}</said><said direct="false">{p_content[match.end():]}</said></p>\n'
                             new_content += tagged_line
                             continue
                         elif match.start() > 0 and match.end() == len(p_content) - 1:
-                            tagged_line = f'<said direct=False>{p_content[:match.start()]}</said><said direct=True>{match.group()}</said></p>\n'
+                            tagged_line = f'<said direct="false">{p_content[:match.start()]}</said><said direct="true">{match.group()}</said></p>\n'
                             new_content += tagged_line
                             continue
                         elif match.start() == 0 and match.end() == len(p_content) - 1:
-                            tagged_line = f'<said direct=True>{match.group()}</said></p>\n'
+                            tagged_line = f'<said direct="true">{match.group()}</said></p>\n'
                             new_content += tagged_line
                             continue
                         else:
-                            tagged_line = f'<said direct=False>{p_content}</said></p>\n'
-                            new_content += tagged_line    
+                            tagged_line = f'<said direct="true">{p_content}</said></p>\n'
+                            new_content += tagged_line 
                             continue
                 else:
-                    tagged_line = f'<said direct=False>{p_content}</said></p>\n'
-                    new_content += tagged_line              
+                    tagged_line = f'<said direct="false">{p_content}</said></p>\n'
+                    new_content += tagged_line
+         
             new_content += '</sample>\n'
         new_content += '</samples>'
         # Save a file
