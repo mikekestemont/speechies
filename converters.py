@@ -4,10 +4,13 @@ import lxml.etree
 
 from nltk import word_tokenize, sent_tokenize
 
-def annotated2sentences(path):
+def annotated2sentences(source):
     sentences = []
-    tree = lxml.etree.parse(path)
-    for speech in tree.iterfind('//said'):
+    if type (source) == str:
+        root = lxml.etree.parse(source).getroot()
+    else:
+        root = source
+    for speech in root.iterfind('.//said'):
         direct = 'I' if speech.attrib['direct'].lower().strip() == 'true' else 'O'
         text = ' '.join(speech.itertext())
         text = ' '.join(text.split())
@@ -18,6 +21,14 @@ def annotated2sentences(path):
                 sentence.append((token, direct))
             sentences.append(sentence)
     return sentences
+
+def annotated2paragraphs (path):
+    paragraphs = []
+    tree = lxml.etree.parse(path)
+    for paragraph in tree.iterfind ('//p'):
+        paragraphs.append (annotated2sentences (paragraph))
+
+    return paragraphs
 
 def extract_ds_from_vrt (in_path, header = True):
     words = []
