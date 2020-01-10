@@ -1,4 +1,29 @@
 
+========== Mismatched in paragraph 325 ==========
+ insert annotated[57:57] ([]) baseline[57:58] (['–'])
+
+========== Mismatched in paragraph 434 ==========
+replace annotated[12:14] (['Kanske', ',']) baseline[12:13] (['Kanske,'])
+
+========== Mismatched in paragraph 441 ==========
+replace annotated[5:7] (['Nej', ',']) baseline[5:6] (['Nej,'])
+
+========== Mismatched in paragraph 477 ==========
+replace annotated[142:144] (['Nej', ',']) baseline[142:143] (['Nej,'])
+
+========== Mismatched in paragraph 495 ==========
+replace annotated[13:15] (['Ajo', ',']) baseline[13:14] (['Ajo,'])
+
+========== Mismatched in paragraph 540 ==========
+replace annotated[80:81] (['«Frøken,»>']) baseline[80:81] (['«Frøken,»'])
+replace annotated[188:189] (['–«nu']) baseline[188:190] (['–', '«nu'])
+
+========== Mismatched in paragraph 607 ==========
+replace annotated[4:6] (['det', ',']) baseline[4:5] (['det,'])
+
+========== Mismatched in paragraph 635 ==========
+replace annotated[1:3] (['gjerne', ',']) baseline[1:2] (['gjerne,'])
+
 ========== Mismatched in paragraph 10 ==========
 replace annotated[4:6] (['»', ',']) baseline[4:5] (['»,'])
 
