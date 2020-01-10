@@ -73,7 +73,7 @@ if __name__ == '__main__':
     annotated_path = os.path.abspath('new/samples_man_annotated/all')
     baseline_path = os.path.abspath('new/samples_baseline')
     df = pd.DataFrame(columns=['precision', 'recall', 'accuracy', 'f1'])
-    for ann_file in [f for f in os.listdir(annotated_path) if f != 'annotated_nor.xml']:
+    for ann_file in [f for f in os.listdir(annotated_path)]:
         print(f'Processing: {ann_file}')
         lang, base_file = find_baseline(ann_file=ann_file, baseline_path=baseline_path)
         baseline_paragraphs = extract_paragraphs(xml_path=base_file)
