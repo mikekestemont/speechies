@@ -3,7 +3,14 @@
 Following [this solution](https://huggingface.co/transformers/examples.html#named-entity-recognition)
 
 ## Preparing data
+### Creating samples
+* Right now, we use samples built according to following criteria:
+   * 5 longest books per ELTeC language corpus
+   * out of which we pick a random sample of 10,000 word length
+   * sampling is performed with following [script](), ensuring the structure maintaining paragraph numbers
 
+### Creating train, test and dev sets
+Samples are collated together with the use of [mix](https://github.com/mikekestemont/speechies/blob/master/mix.py) script, which takes iterates over all language-specific samples, taking a paragraph of each of them, and creating a mixed vector, then dividing and saving it into train (0.8 of all data), test (0.1) and dev (0.1) text files.
 
 ## Necessary installations
 
