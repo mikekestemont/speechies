@@ -8,24 +8,24 @@ def baseline(in_file, out_file):
     with open(in_file, 'r', encoding='utf-8') as inf:
         xml = inf.read()
     patterns = [
-        re.compile(r"^\s*([\"].*?[\"])", flags=re.MULTILINE),
-        re.compile(r"^\s*([\'].*?[\'])", flags=re.MULTILINE),
-        re.compile(r"^\s*([-——-———]+.*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([-——-———]+.*?)\n", flags=re.MULTILINE),
-        re.compile(r"^\s*([-]+.*?[-]+)", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
-        re.compile(r"^\s*([—]+.*?[—]+)", flags=re.MULTILINE),
-        re.compile(r"^\s*([--]+.*?)[»]", flags=re.MULTILINE),
-        re.compile(r"^\s*([„].*?[”])", flags=re.MULTILINE),
-        re.compile(r"^\s*([«].*?[»])", flags=re.MULTILINE),
-        re.compile(r"^\s*([»].*?[«])", flags=re.MULTILINE),
-        re.compile(r"^\s*([›].*?[‹])", flags=re.MULTILINE),
-        re.compile(r"^\s*([“].*?[”])", flags=re.MULTILINE),
-        re.compile(r"^\s*([„].*?[“])", flags=re.MULTILINE),
-        re.compile(r"^\s*([«].*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([»].*?)$", flags=re.MULTILINE),
-        re.compile(r"^\s*([«].*?)\n", flags=re.MULTILINE),
-        re.compile(r"^\s*([»].*?)\n", flags=re.MULTILINE),
+        re.compile(r"\s*([\"].*?[\"])", flags=re.MULTILINE),
+        re.compile(r"\s*([\'].*?[\'])", flags=re.MULTILINE),
+        re.compile(r"\s*([-——-———]+.*?)$", flags=re.MULTILINE),
+        re.compile(r"\s*([-——-———]+.*?)\n", flags=re.MULTILINE),
+        re.compile(r"\s*([-]+.*?[-]+)", flags=re.MULTILINE),
+        re.compile(r"\s*([—]+.*?[—]+)", flags=re.MULTILINE),
+        re.compile(r"\s*([—]+.*?[—]+)", flags=re.MULTILINE),
+        re.compile(r"\s*([--]+.*?)[»]", flags=re.MULTILINE),
+        re.compile(r"\s*([„].*?[”])", flags=re.MULTILINE),
+        re.compile(r"\s*([«].*?[»])", flags=re.MULTILINE),
+        re.compile(r"\s*([»].*?[«])", flags=re.MULTILINE),
+        re.compile(r"\s*([›].*?[‹])", flags=re.MULTILINE),
+        re.compile(r"\s*([“].*?[”])", flags=re.MULTILINE),
+        re.compile(r"\s*([„].*?[“])", flags=re.MULTILINE),
+        re.compile(r"\s*([«].*?)$", flags=re.MULTILINE),
+        re.compile(r"\s*([»].*?)$", flags=re.MULTILINE),
+        re.compile(r"\s*([«].*?)\n", flags=re.MULTILINE),
+        re.compile(r"\s*([»].*?)\n", flags=re.MULTILINE),
     ]
     
     xml_string = et.fromstring(xml)
@@ -49,6 +49,8 @@ def baseline(in_file, out_file):
                     # set_trace ()
                 # Find matches
                 matches = [bool(re.match(pattern, p_content)) for pattern in patterns]
+                print (p_content)
+                return
                 if any(matches):
                     # get first matching pattern
                     pattern = patterns[matches.index(True)]
@@ -84,12 +86,14 @@ def baseline(in_file, out_file):
             ouf.write(new_content)
 
 if __name__ == '__main__':
-    samples_path = os.path.abspath('samples_of_eltec/samples')
-    baseline_path = os.path.join(os.getcwd(), 'samples_baseline')
+    samples_path = os.path.abspath('new/eltec_samples/')
+    baseline_path = os.path.join(os.getcwd(), 'samples_baseline1')
     if not os.path.exists(baseline_path):
         os.makedirs(baseline_path)
     eltec_langs = os.listdir(samples_path)
     for eltec_lang in eltec_langs:
+        if eltec_lang.startswith('.'):
+            continue
         eltec_path = os.path.join(samples_path, eltec_lang)
         eltec_xmls = os.listdir(eltec_path)
         baseline_lang = os.path.join(baseline_path, eltec_lang)
