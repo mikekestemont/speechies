@@ -105,3 +105,6 @@ venv.bak/
 
 # Just for local tests
 Untitled.ipynb
+
+# tmp directory
+tmp/

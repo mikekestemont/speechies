@@ -1,4 +1,5 @@
 import glob
+import os
 import re
 import lxml.etree
 
@@ -139,3 +140,97 @@ if __name__ == '__main__':
         except:
             print ('Failed:', fname)
         writeToFile ('deBert.vrt', tokens)
+
+def tokenize (text):
+    text = re.sub (r'[\r\n\t]', ' ', text)
+    text = re.sub (r' {2,}', ' ', text)
+    return [tok for tok in re.split (r'([^\w-])', text) if tok.strip ()]
+
+def tei2bert (in_path, out_path):
+    root = lxml.etree.parse(in_path).getroot()
+    paragraphs = []
+    for paragraph in root.findall ('.//p', namespaces = root.nsmap):
+        text = ' '.join ([t for t in paragraph.itertext ()])
+        tokens = tokenize (text)
+        paragraphs.append ('\n'.join (tokens))
+    with open (out_path, 'w', encoding = 'utf8') as fout:
+        fout.write ('\n\n'.join (paragraphs))
+
+def bert2tei (xml_path, bert_path, save = False):
+
+    def find_paragraphs_with_words (text):
+        pat = re.compile (r'<p(?:>| [^/]*?>)(.*?)</p>', re.DOTALL)
+        paragraphs = []
+        position = 0
+        for par_match in re.finditer (pat, text):
+            paragraph = []
+            position = par_match.start ()
+            if par_match.group (1) == None or not par_match.group (1).strip ():
+                paragraphs.append (paragraph)
+                continue
+            for word in tokenize (par_match.group (1)):
+                word_start = text.find (word, position, position + 50)
+                assert word_start != -1
+                word_end = word_start + len (word)
+                paragraph.append ((word_start, word_end))
+                position = word_end
+            paragraphs.append (paragraph)
+
+        return paragraphs
+
+    def find_chunks (tokens):
+
+        chunks = []
+        cur_label = 'O'
+        chunk_start = -1
+        for ind, token in enumerate (tokens):
+            if cur_label != token[1]:
+                if token[1] == 'O':
+                    chunks.append ((chunk_start, ind - 1))
+                    chunk_start = -1
+                else:
+                    chunk_start = ind
+            cur_label = token[1]
+        if chunk_start != -1:
+            chunks.append ((chunk_start, len (tokens) - 1))
+
+        return chunks
+
+    bert_paragraphs = []
+    with open (bert_path, encoding = 'utf8') as fbert:
+        par = []
+        for line in fbert:
+            if line == '\n':
+                if par:
+                    bert_paragraphs.append (par)
+                    par = []
+            else:
+                word, label = line.strip ().split ()
+                par.append ((word, label))
+        if par:
+            bert_paragraphs.append (par)
+    with open (xml_path, encoding = 'utf8') as fxml:
+        text = fxml.read ()
+        xml_paragraphs = find_paragraphs_with_words (text)
+    assert len (bert_paragraphs) == len (xml_paragraphs)
+    offset = 0
+    annotated_text = ''
+    for xpar, bpar in zip (xml_paragraphs, bert_paragraphs):
+        for chunk_start, chunk_end in find_chunks (bpar):
+            start = xpar[chunk_start][0]
+            end = xpar[chunk_end][1]
+            annotated_text += text[offset:start] + '<said>' + text[start:end] + '</said>'
+            offset = end
+    annotated_text += text[offset:]
+
+    if save:
+        if type (save) == str:
+            output_path = save
+        else:
+            name, ext = os.path.splitext (xml_path)
+            output_path = name + '_annotated' + ext
+        with open (output_path, 'w', encoding = 'utf8') as fout:
+            fout.write (annotated_text)
+        print ('Annotated XML file saved: ', output_path)
+
+    return annotated_text
