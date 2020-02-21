@@ -80,10 +80,10 @@ def find_baseline(ann_file, baseline_path):
         return lang, base_xml
 
 if __name__ == '__main__':
-    annotated_path = os.path.abspath('new/samples_correct_tei/all')
+    annotated_path = os.path.abspath('new/samples_correct_tei_upd')
     baseline_path = os.path.abspath('new/samples_baseline_february')
     
-    with open(r'precision_recall_february.tsv', 'w') as precision_recall_file:
+    with open(r'precision_recall_february_upd.tsv', 'w') as precision_recall_file:
         writer = csv.writer(precision_recall_file, delimiter='\t')
         writer.writerow(['lang', 'precision', 'recall', 'accuracy', 'f1'])
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         annotated_paragraphs = extract_paragraphs(os.path.join(annotated_path, ann_file))
         tp, tn, fp, fn, N = count_values(annotated_paragraphs=annotated_paragraphs, baseline_paragraphs=baseline_paragraphs, lang=lang)
         precision, recall, accuracy, f1 = calculate_metrics(tp=tp, tn=tn, fp=fp, fn=fn, N=N)
-        with open(r'precision_recall_february.tsv', 'a') as precision_recall_file:
+        with open(r'precision_recall_february_upd.tsv', 'a') as precision_recall_file:
             writer = csv.writer(precision_recall_file, delimiter='\t')
             writer.writerow([lang, precision, recall, accuracy, f1])
     print('Done.')
