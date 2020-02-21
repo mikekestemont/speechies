@@ -60,7 +60,8 @@ def annotated2sentences(source):
         root = source
     text = []
     direct = []
-    for paragraph in root.iterfind('.//p'):
+    paragraphs = [root] if root.tag == 'p' else root.findall ('.//p')
+    for paragraph in paragraphs:
         for text, direct in get_paragraph_chunks (paragraph):
             for sent in sent_tokenize(text):
                 sentence = []
