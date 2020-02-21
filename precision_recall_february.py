@@ -83,7 +83,7 @@ if __name__ == '__main__':
     annotated_path = os.path.abspath('new/samples_correct_tei_upd')
     baseline_path = os.path.abspath('new/samples_baseline_february')
     
-    with open(r'precision_recall_february.tsv', 'w') as precision_recall_file:
+    with open(r'precision_recall_february_upd.tsv', 'w') as precision_recall_file:
         writer = csv.writer(precision_recall_file, delimiter='\t')
         writer.writerow(['lang', 'precision', 'recall', 'accuracy', 'f1'])
 
