@@ -5,22 +5,68 @@ import lxml.etree
 
 from nltk import word_tokenize, sent_tokenize
 
+
+def get_paragraph_chunks (paragraph):
+
+    def in_said (element):
+        return bool (element.xpath ('ancestor::said'))
+
+    def get_node_text (node):
+        text = []
+        if node.text and node.text.strip ():
+            text.append (' '.join (node.text.split ()))
+        for child in node.getchildren ():
+            if child.tag == 'said':
+                break
+            text += get_node_text (child)
+            if child.tail:
+                text.append (' '.join (child.tail.split ()))
+        return text
+
+    chunks = []
+    chunk = []
+    tail = []
+
+    for element in paragraph.iter ():
+        if element.tag == 'said':
+            if tail:
+                chunk += tail
+                tail = []
+            if chunk:
+                chunks.append ((' '.join (chunk), 'O'))
+                chunk = []
+            chunks.append ((' '.join (get_node_text (element)), 'I'))
+            if element.tail:
+                tail += element.tail.split ()
+        else:
+            if in_said (element):
+                continue
+            if tail:
+                chunk += tail
+                tail = []
+            chunk += get_node_text (element)
+            if element.tail:
+                chunk += element.tail.split ()
+    if chunk:
+        chunks.append ((' '.join (chunk), 'O'))
+
+    return chunks
+
 def annotated2sentences(source):
     sentences = []
     if type (source) == str:
         root = lxml.etree.parse(source).getroot()
     else:
         root = source
-    for speech in root.iterfind('.//said'):
-        direct = 'I' if speech.attrib['direct'].lower().strip() == 'true' else 'O'
-        text = ' '.join(speech.itertext())
-        text = ' '.join(text.split())
-
-        for sent in sent_tokenize(text):
-            sentence = []
-            for token in word_tokenize(sent):
-                sentence.append((token, direct))
-            sentences.append(sentence)
+    text = []
+    direct = []
+    for paragraph in root.iterfind('.//p'):
+        for text, direct in get_paragraph_chunks (paragraph):
+            for sent in sent_tokenize(text):
+                sentence = []
+                for token in word_tokenize(sent):
+                    sentence.append((token, direct))
+                sentences.append(sentence)
     return sentences
 
 def annotated2paragraphs (path):
